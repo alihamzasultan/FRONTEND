@@ -116,7 +116,8 @@ export function Avatar(props) {
       setAnimation("Idle");
       return;
     }
-    const audioUrl = `http://localhost:3000${message.audio}`;
+    const audioUrl = `https://backend-production-9c7a4.up.railway.app${message.audio}`;
+
     setAnimation(message.animation);
     setFacialExpression(message.facialExpression);
     setLipsync(message.lipsync);
