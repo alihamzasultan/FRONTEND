@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const backendUrl = import.meta.env.VITE_API_URL || "https://backend-production-9c7a4.up.railway.app";
+const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 
 const ChatContext = createContext();
