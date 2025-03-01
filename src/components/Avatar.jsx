@@ -111,22 +111,71 @@ export function Avatar(props) {
   const [lipsync, setLipsync] = useState();
 
   useEffect(() => {
-    console.log(message);
+    console.log("Message received:", message);
     if (!message) {
       setAnimation("Idle");
       return;
     }
-    const SERVER_URL = "https://backend-production-9c7a4.up.railway.app"; 
-    const audioUrl = `${SERVER_URL}${message.audio}`;
+  
+    const audioUrl = `https://backend-production-c24c.up.railway.app${message.audio}`;
     setAnimation(message.animation);
     setFacialExpression(message.facialExpression);
-    setLipsync(message.lipsync);
+  
+    const jsonUrl = message.lipsync
+      ? `https://backend-production-c24c.up.railway.app${message.lipsync}`
+      : `https://backend-production-c24c.up.railway.app/audios/api_0.json`;
+  
     const audio = new Audio(audioUrl);
+  
+    fetch(jsonUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Lipsync data:", data);
+  
+        audio.onloadedmetadata = () => {
+          const audioDuration = audio.duration;
+          console.log("Audio Duration:", audioDuration);
+  
+          if (data.mouthCues && data.mouthCues.length > 0) {
+            const maxCueTime = Math.max(...data.mouthCues.map(cue => cue.end));
+            let newMouthCues = [...data.mouthCues];
+  
+            if (audioDuration > maxCueTime) {
+              // If audio is longer, add new mouth cues randomly
+              const extraTime = audioDuration - maxCueTime;
+              const cueDuration = maxCueTime / newMouthCues.length;
+              let newCues = [];
+  
+              for (let i = 0; i < Math.ceil(extraTime / cueDuration); i++) {
+                let randomCue = { ...newMouthCues[i % newMouthCues.length] };
+                randomCue.start = maxCueTime + i * cueDuration;
+                randomCue.end = randomCue.start + cueDuration;
+                newCues.push(randomCue);
+              }
+  
+              newMouthCues = [...newMouthCues, ...newCues];
+            } else {
+              // Trim mouthCues if needed
+              newMouthCues = newMouthCues.filter(cue => cue.end <= audioDuration);
+            }
+  
+            console.log("Adjusted Lipsync:", newMouthCues);
+            setLipsync({ mouthCues: newMouthCues });
+          } else {
+            setLipsync({ mouthCues: [] });
+          }
+        };
+      })
+      .catch((error) => {
+        console.error("Error fetching lipsync data:", error);
+        setLipsync({ mouthCues: [] });
+      });
+  
     audio.play();
     setAudio(audio);
     audio.onended = onMessagePlayed;
   }, [message]);
-
+  
   const { animations } = useGLTF("/models/animations.glb");
 
   const group = useRef();
@@ -371,5 +420,5 @@ export function Avatar(props) {
   );
 }
 
-useGLTF.preload("/models/f2.glb");
+useGLTF.preload("/models/64f1a714fe61576b46f27ca2.glb");
 useGLTF.preload("/models/animations.glb");
