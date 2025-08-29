@@ -1,4 +1,4 @@
-![Video Thumbnail](https://img.youtube.com/vi/EzzcEL_1o9o/maxresdefault.jpg)
+
 
 [TEST NOW: ](https://frontend-76xu.vercel.app/))
 
